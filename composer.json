@@ -24,11 +24,12 @@
         "php": ">=7.0",
         "yiisoft/yii2": "*",
         "yiisoft/yii2-bootstrap": "*",
+        "deitsolutions/bigcommerce-api-php": "*",
         "pantera-digital/yii2-sberbank-pay": "dev-master"
     },
     "autoload": {
         "psr-4": {
-            "deitsolutions\\yii2-bigcommerce-sberbank\\": ""
+            "deitsolutions\\bcsber\\": ""
         }
     }
 }

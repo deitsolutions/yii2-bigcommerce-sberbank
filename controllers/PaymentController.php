@@ -1,13 +1,13 @@
 <?php
 
 
-namespace deitsolutions\yii2bigcommercesberbank\controllers;
+namespace deitsolutions\bcsber\controllers;
 
 use yii\filters\Cors;
 
 /**
- * Class DefaultController
- * @package deitsolutions\yii2bigcommercesberbank\controllers
+ * Class PaymentController
+ * @package deitsolutions\bcsber\controllers
  */
 class PaymentController extends ActiveController
 {
@@ -15,7 +15,7 @@ class PaymentController extends ActiveController
     /**
      * @var string
      */
-    public $modelClass = 'deitsolutions\yii2bigcommercesberbank\models\Payment';
+    public $modelClass = 'deitsolutions\bcsber\models\Payment';
 
     /**
      * @SWG\Get(path="/payment",
@@ -56,7 +56,7 @@ class PaymentController extends ActiveController
                 'class' => Cors::class,
                 'cors' => [
                     // restrict access to domains:
-                    'Origin' => ($storeId) ? $this->module->stores[$storeId]['apiSettings']['domains'] : null,
+                    'Origin' => ($storeId) ? $this->module->stores[$storeId]['settings']['acceptedDomains'] : null,
                     'Access-Control-Request-Method' => ['POST', 'GET', 'PUT', 'DELETE'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,
