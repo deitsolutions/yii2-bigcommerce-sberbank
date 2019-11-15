@@ -25,7 +25,7 @@
         "yiisoft/yii2": "*",
         "yiisoft/yii2-bootstrap": "*",
         "deitsolutions/bigcommerce-api-php": "*",
-        "pantera-digital/yii2-sberbank-pay": "dev-master"
+        "voronkovich/sberbank-acquiring-client": "dev-master"
     },
     "autoload": {
         "psr-4": {

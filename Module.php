@@ -1,12 +1,12 @@
 <?php
 
-namespace Bigcommerce\Sberbank;
+namespace deitsolutions\bcsber;
 
 use yii\base\Module as BaseModule;
 
 /**
  * Class Module
- * @package Bigcommerce\Sberbank
+ * @package deitsolutions\bcsber
  */
 class Module extends BaseModule
 {
