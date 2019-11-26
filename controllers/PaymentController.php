@@ -57,14 +57,13 @@ class PaymentController extends Controller
     public function actionCreate()
     {
         $model = new Payment();
-        $response = \Yii::$app->getResponse();
         $fields = \Yii::$app->getRequest()->getBodyParams();
         //$fields = \Yii::$app->getRequest()->getQueryParams(); //@TODO replace with BODY params
         if ($model->load($fields, '') && $model->validate()) {
             if (isset($this->module->stores[$model->storeId]['adapter']['auth'])) {
                 $order = $model->getBigcommerceOrder($this->module->stores[$model->storeId]['adapter']['auth']);
                 if ($order) {
-                    $invoice = Payment::createSberbankInvoice($order);
+                    $invoice = Payment::createSberbankInvoice($order, $this->module->stores[$model->storeId]['settings']);
                     $response = \Yii::$app->modules['sberbank']->sberbank->create($invoice);
                     if (isset($response['errorCode'])) {
                         throw new ErrorException($response['errorMessage']);

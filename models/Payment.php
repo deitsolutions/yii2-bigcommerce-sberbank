@@ -41,7 +41,7 @@ class Payment extends Model
      */
     public function getBigcommerceOrder($config)
     {
-        $result = false;
+        $bcObject = false;
         Bigcommerce::configure($config);
         Bigcommerce::failOnError(true);
         $order = Bigcommerce::getOrder($this->orderId);
@@ -50,18 +50,22 @@ class Payment extends Model
                 return is_object($this->fields) ? clone $this->fields : $this->fields;
             };
             $getAllFields = $allFields->bindTo($order, $order);
-            $result = $getAllFields();
-            $result->products = [];
+            $object = $getAllFields();
+            $bcObject = new \stdClass();
+            foreach (get_object_vars($object) as $key => $value) {
+                $bcObject->$key = $value;
+            }
+            $bcObject->products = [];
 
             $orderProducts = Bigcommerce::getOrderProducts($this->orderId);
             if ($orderProducts) {
                 foreach ($orderProducts as $key => $orderProduct) {
                     $getAllFields = $allFields->bindTo($orderProduct, $orderProduct);
-                    $result->products[$key] = $getAllFields();
+                    $bcObject->products[$key] = $getAllFields();
                 }
             }
         }
-        return $result;
+        return $bcObject;
     }
 
     /**
@@ -79,34 +83,44 @@ class Payment extends Model
      * @param $order
      * @param $config
      */
-    public static function createSberbankInvoice($order)
+    public static function createSberbankInvoice($order, $settings)
     {
         $cartItems = [];
         foreach ($order->products as $i => $product) {
-            $cartItems[] = [
+            $cartItem = [
                 'positionId' => $i + 1,
-                'name' => $product->name,
+                'name' => substr($product->name, 0, 100),
                 'quantity' => [
                     'value' => $product->quantity,
                     'measure' => 'штук',
                 ],
                 'itemAmount' => $product->total_inc_tax,
+                'itemPrice' => $product->price_inc_tax,
                 'itemCode' => $product->sku,
-                'itemAttributes' => [
-                    'paymentMethod' => 1,
-                    'paymentObject' => 1,
-                ],
             ];
+            if (isset($settings->paymentMethod) && $settings->paymentMethod) {
+                $cartItem['itemAttributes']['paymentMethod'] = $settings->paymentMethod;
+            }
+            if (isset($settings->paymentObject) && $settings['paymentObject']) {
+                $cartItem['itemAttributes']['paymentObject'] = $settings->paymentObject;
+            }
+
+            $cartItems[] = $cartItem;
         }
         $orderBundle = [
             'orderCreationDate' => date('Y-m-d', strtotime($order->date_created)) . 'T' . date('h:i:s', strtotime($order->date_created)),
-            'customerDetails' => ['email' => $order->billing_address->email],
+            'customerDetails' => [
+                'email' => $order->billing_address->email,
+            ],
             'cartItems' => $cartItems,
         ];
 
         $params = [
             'orderBundle' => $orderBundle,
         ];
+        if (isset($settings->taxSystem) && $settings->taxSystem) {
+            $params['taxSystem'] = $settings->taxSystem;
+        }
 
         $invoice = \pantera\yii2\pay\sberbank\models\Invoice::addSberbank($order->id, $order->total_inc_tax, null, $params);
         return $invoice;
